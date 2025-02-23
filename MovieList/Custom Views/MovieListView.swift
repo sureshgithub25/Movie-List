@@ -7,46 +7,50 @@
 
 import SwiftUI
 
-import SwiftUI
-
 struct MovieListView: View {
     @StateObject var viewModel = MovieListViewModel()
 
     var body: some View {
-        VStack {
-            HeaderView(title: "Movie List")
+        ZStack {
+            LinearGradient(gradient: Gradient(colors: [Color.blue.opacity(0.3), Color.purple.opacity(0.3)]),
+                           startPoint: .topLeading,
+                           endPoint: .bottomTrailing)
+                .ignoresSafeArea()
 
-            ScrollView {
-                VStack(spacing: 10) {
-                    ForEach(viewModel.movies) { movie in
-                        MovieRow(movie: movie, viewModel: viewModel)
-                            .onAppear {
-                                if viewModel.movies.last?.id == movie.id {
-                                    viewModel.fetchNextBatch()
+            VStack {
+                HeaderView(title: "🎬 Movie List")
+
+                ScrollView {
+                    VStack(spacing: 16) {
+                        ForEach(viewModel.movies) { movie in
+                            MovieRow(movie: movie, viewModel: viewModel)
+                                .onAppear {
+                                    if viewModel.movies.last?.id == movie.id {
+                                        viewModel.fetchNextBatch()
+                                    }
                                 }
-                            }
+                        }
                     }
+                    .padding()
                 }
-                .padding(.top)
             }
         }
-        .background(Color(UIColor.systemGroupedBackground))
     }
 }
 
-// ✅ Header View Component
 struct HeaderView: View {
     let title: String
 
     var body: some View {
         Text(title)
-            .font(.title)
+            .font(.largeTitle)
             .fontWeight(.bold)
-            .padding(.top, 10)
+            .foregroundColor(.white)
+            .padding(.top, 16)
+            .shadow(radius: 5)
     }
 }
 
-// ✅ Movie Row Component
 struct MovieRow: View {
     let movie: Movie
     @ObservedObject var viewModel: MovieListViewModel
@@ -55,9 +59,10 @@ struct MovieRow: View {
         VStack {
             HStack {
                 Text(movie.name)
-                    .font(.headline)
-                    .foregroundColor(.primary)
-                
+                    .font(.title3)
+                    .foregroundColor(.white)
+                    .bold()
+
                 Spacer()
 
                 WatchButton(isWatched: movie.watched) {
@@ -70,53 +75,67 @@ struct MovieRow: View {
             }
             .padding()
         }
-        .background(Color(UIColor.secondarySystemBackground))
-        .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 2)
-        .padding(.horizontal)
-
-        Divider()
-            .padding(.horizontal, 16)
+        .background(BlurView(style: .systemThinMaterialDark))
+        .cornerRadius(14)
+        .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
+        .padding(.horizontal, 16)
+        .animation(.easeInOut(duration: 0.3))
     }
 }
 
-// ✅ Watch Button Component
 struct WatchButton: View {
     let isWatched: Bool
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Text(isWatched ? "Unwatch" : "Watched")
-                .font(.footnote)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(isWatched ? Color.green : Color.gray)
+            Text(isWatched ? "✔ Unwatch" : "👀 Watched")
+                .font(.caption)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(isWatched ? Color.green.opacity(0.8) : Color.gray.opacity(0.8))
                 .foregroundColor(.white)
-                .cornerRadius(10)
-                .shadow(radius: 2)
+                .cornerRadius(12)
         }
+        .shadow(radius: 3)
     }
 }
 
-// ✅ Watchlist Button Component
 struct WatchlistButton: View {
     let isInWatchlist: Bool
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
-            Text(isInWatchlist ? "Remove" : "Watchlist")
-                .font(.footnote)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(isInWatchlist ? Color.orange : Color.blue)
+            Text(isInWatchlist ? "🗑 Remove" : "➕ Watchlist")
+                .font(.caption)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(isInWatchlist ? Color.red.opacity(0.8) : Color.blue.opacity(0.8))
                 .foregroundColor(.white)
-                .cornerRadius(10)
-                .shadow(radius: 2)
+                .cornerRadius(12)
         }
+        .shadow(radius: 3)
     }
 }
+
+struct BlurView: UIViewRepresentable {
+    var style: UIBlurEffect.Style
+
+    func makeUIView(context: Context) -> UIVisualEffectView {
+        let view = UIVisualEffectView(effect: UIBlurEffect(style: style))
+        return view
+    }
+
+    func updateUIView(_ uiView: UIVisualEffectView, context: Context) {}
+}
+
+struct MovieListView_Previews: PreviewProvider {
+    static var previews: some View {
+        MovieListView()
+    }
+}
+
 
 
 
